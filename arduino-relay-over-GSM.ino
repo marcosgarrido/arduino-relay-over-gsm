@@ -9,8 +9,8 @@ GSM_SMS sms;
 
 #define ADMINNUMBER "+xxxxxxxxxxx"  // Mobile number that the admin uses to send sms.
 #define DOORNUMBER "xxxxxxxxx"      // Mobile number to be called to open the door.
-#define PINNUMBER ""                // PIN number of the SIM card of the door. 
-const int NUMBERSIZE = 20;          // Maximun number lenght.
+#define PINNUMBER ""                // PIN number of the SIM card of the door.
+const int NUMBERSIZE = 20;          // Maximum number length.
 int relay = 1;                      // Door relay output.
 
 void setup() {
@@ -26,14 +26,14 @@ void loop() {
   if (scannerNetworks.getCurrentCarrier().equals("")) {
     Serial.println("GSM not connected.");
     startGSM();
-  } 
+  }
   processVoiceCalls();
   processSMS();
   delay(1000);
 }
 
 void startSD() {
-  
+
   Serial.print("Starting SD card...");
 
   if (!SD.begin(4)) {
@@ -44,9 +44,9 @@ void startSD() {
 }
 
 void startGSM () {
-  
+
   boolean notConnected = true;
- 
+
   while (notConnected) {
     Serial.println("Starting GSM.");
     if (gsmAccess.begin(PINNUMBER,true)==GSM_READY) {
@@ -65,13 +65,13 @@ void openDoor() {
 
   digitalWrite(relay, LOW);
   delay(400);
-  digitalWrite(relay, HIGH);   
+  digitalWrite(relay, HIGH);
 }
 
 void processVoiceCalls() {
 
   char remoteNumber[NUMBERSIZE];
-  
+
   switch (vcs.getvoiceCallStatus()) {
     case IDLE_CALL:
       break;
@@ -92,7 +92,7 @@ void processVoiceCalls() {
       }
       break;
     case TALKING:
-      vcs.hangCall();      
+      vcs.hangCall();
       break;
   }
 }
@@ -123,7 +123,7 @@ void processSMS() {
       Serial.println(number);
       sms.flush();
       if (action == '1') {                  // if the number sent is preceded by 1 it will be added.
-        addNumberToAllowed(number); 
+        addNumberToAllowed(number);
       } else if (action == '0' ) {          // if the number sent is preceded by 0 it will be removed.
         removeNumberFromAllowed(number);
       } else if (action == '2') {           // option 2 will send an sms to the admin with a list of allowed numbers.
@@ -148,7 +148,7 @@ void addNumberToAllowed(const char * number) {
   } else {
     sendSMS(ADMINNUMBER, "Number already exists.");
   }
-  
+
 }
 
 void removeNumberFromAllowed(const char * number) {
@@ -156,7 +156,7 @@ void removeNumberFromAllowed(const char * number) {
   if (isNumberAllowed(number)) {
     File allowedNumbers = SD.open("allowed.txt", FILE_READ);
     File temp = SD.open("temp.txt", FILE_WRITE);
-  
+
     while (allowedNumbers.available()) {
       String s = allowedNumbers.readStringUntil('\n');
       char actualNumber[NUMBERSIZE];
@@ -190,14 +190,14 @@ boolean isNumberAllowed(const char * number) {
 
   boolean found = false;
   File allowedNumbers = SD.open("allowed.txt", FILE_READ);
- 
+
   while (allowedNumbers.available()) {
     String s = allowedNumbers.readStringUntil('\n');
     char actualNumber[NUMBERSIZE];
     s.toCharArray(actualNumber, s.length());
     if (strcmp(actualNumber, number) == 0) {
       found = true;
-    } 
+    }
   }
   allowedNumbers.close();
 
@@ -229,7 +229,7 @@ void getAllowedNumbers() {
 }
 
 void sendSMS(const char * number, const char * text) {
-  
+
   sms.beginSMS(number);
   sms.print(text);
   sms.endSMS();
@@ -244,7 +244,7 @@ void notifyAllowedNumber(const char * number) {
 }
 
 void notifyAllowedNumbers() {
-  
+
   int size = 0;
   File allowedNumbers = SD.open("allowed.txt", FILE_READ);
   sms.beginSMS(ADMINNUMBER);
